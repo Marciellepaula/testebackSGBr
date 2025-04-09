@@ -22,8 +22,6 @@ class PlaceController extends Controller
 
     public function index(Request $request)
     {
-
-        dd('wehurd');
         $places = $this->service->list($request->all());
         return $this->success(PlaceResource::collection($places), 'List of places');
     }
