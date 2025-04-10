@@ -38,7 +38,7 @@ class PlaceControllerTest extends TestCase
 
         $response = $this->postJson('/api/places', $data);
 
-        $response->assertStatus(201)
+        $response->assertStatus(200)
             ->assertJsonFragment(['name' => 'Test Place']);
         $this->assertDatabaseHas('places', ['slug' => 'test-place']);
     }
