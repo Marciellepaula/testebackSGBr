@@ -44,7 +44,7 @@ class PlaceController extends Controller
     public function show($id)
     {
         $place = $this->service->show($id);
-        if (!$place) return $this->error('Local não encontrado', 404);
+        if (!$place) return $this->error('Not found', 404);
         return $this->success(new PlaceResource($place));
     }
 
