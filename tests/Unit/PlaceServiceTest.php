@@ -5,88 +5,103 @@ namespace Tests\Unit;
 use App\Models\Place;
 use App\Repositories\PlaceRepository;
 use App\Services\PlaceService;
-use Mockery;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
-use PHPUnit\Framework\TestCase;
+use Mockery;
+use Tests\TestCase;
 
 class PlaceServiceTest extends TestCase
 {
-    protected $mockRepo;
-    protected PlaceService $service;
+    use RefreshDatabase;
+
+    protected $repository;
+    protected $service;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->mockRepo = Mockery::mock(PlaceRepository::class);
-        $this->service = new PlaceService($this->mockRepo);
+        $this->repository = \Mockery::mock(PlaceRepository::class);
+        $this->service = new PlaceService($this->repository);
     }
 
-    public function test_it_lists_places(): void
+    public function testList(): void
     {
-        $places = collect(['Place 1', 'Place 2']);
+        $filters = ['search' => 'test'];
+        $places = new Collection([new Place()]);
 
-        $this->mockRepo
-            ->shouldReceive('all')
-            ->with([])
+        $this->repository->shouldReceive('all')
+            ->with($filters)
             ->once()
             ->andReturn($places);
 
-        $result = $this->service->list();
+        $result = $this->service->list($filters);
 
-        $this->assertInstanceOf(Collection::class, $result);
-        $this->assertCount(2, $result);
+        $this->assertEquals($places, $result);
     }
 
-    public function test_it_stores_a_place(): void
+    public function testShow(): void
     {
-        $data = ['name' => 'Test', 'city' => 'City', 'state' => 'State'];
+        $id = 1;
+        $place = new Place();
+
+        $this->repository->shouldReceive('find')
+            ->with($id)
+            ->once()
+            ->andReturn($place);
+
+        $result = $this->service->show($id);
+
+        $this->assertEquals($place, $result);
+    }
+
+    public function testStore(): void
+    {
+        $data = ['name' => 'Test Place'];
         $place = new Place($data);
 
-        $this->mockRepo
-            ->shouldReceive('create')
+        $this->repository->shouldReceive('create')
             ->with($data)
             ->once()
             ->andReturn($place);
 
         $result = $this->service->store($data);
 
-        $this->assertInstanceOf(Place::class, $result);
-        $this->assertEquals('Test', $result->name);
+        $this->assertEquals($place, $result);
     }
 
-    public function test_it_updates_a_place(): void
+    public function testUpdate(): void
     {
-        $data = ['name' => 'Updated'];
-        $updatedPlace = new Place($data);
+        $id = 1;
+        $data = ['name' => 'Updated Place'];
+        $place = new Place($data);
 
-        $this->mockRepo
-            ->shouldReceive('update')
-            ->with($data, 1)
+        $this->repository->shouldReceive('update')
+            ->with($data, $id)
             ->once()
-            ->andReturn($updatedPlace);
+            ->andReturn($place);
 
-        $result = $this->service->update($data, 1);
+        $result = $this->service->update($data, $id);
 
-        $this->assertEquals('Updated', $result->name);
+        $this->assertEquals($place, $result);
     }
 
-    public function test_it_deletes_a_place(): void
+    public function testDelete(): void
     {
-        $this->mockRepo
-            ->shouldReceive('delete')
-            ->with(1)
+        $id = 1;
+
+        $this->repository->shouldReceive('delete')
+            ->with($id)
             ->once()
             ->andReturn(true);
 
-        $result = $this->service->delete(1);
+        $result = $this->service->delete($id);
 
         $this->assertTrue($result);
     }
 
     protected function tearDown(): void
     {
-        Mockery::close();
+        \Mockery::close();
         parent::tearDown();
     }
 }
