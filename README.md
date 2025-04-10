@@ -1,4 +1,4 @@
-## Event Mnagement  
+## Place
 
 Para Executar o Projeto basta seguir os seguintes passos:
 
